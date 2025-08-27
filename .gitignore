@@ -1,0 +1,16 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/Admin/.vs/Admin
+/Admin/bin
+/Admin/obj
+/Admin/Properties
+/BAL/bin
+/BAL/obj
+/Common/bin
+/Common/obj
+/DAL/bin
+/DAL/obj
+/DB
