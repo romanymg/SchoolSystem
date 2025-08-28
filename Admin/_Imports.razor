@@ -1,4 +1,5 @@
 ﻿@using System.Net.Http
+@using Admin.Helpers
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
@@ -8,3 +9,23 @@
 @using Microsoft.JSInterop
 @using Admin
 @using Admin.Shared
+@using BAL.Services
+
+@using MudBlazor
+@using MudBlazor.Utilities
+
+@using Common.Helpers;
+@using Common.Models
+
+@inject IServiceProvider ServiceProvider
+@inject NavigationManager navigation
+@inject IJSRuntime js
+@inject JScript jScript
+@inject GridFilter _gridFilter
+
+@inject ICurrentRequest _currentRequest
+@inject ISnackbar toast
+@inject IDialogService dialogService
+
+
+@inject UserService _userService

@@ -1,0 +1,76 @@
+﻿<MudAutocomplete T="SelectEntity" Label="@Label"
+                 @bind-Value="SelectedEntity"
+                 Text="@SelectedEntity?.Title"
+                 SelectOnClick="true"
+                 ResetValueOnEmptyText="true"
+                 CoerceText="true"
+                 CoerceValue="true"
+                 Clearable="true"
+                 Required="@Required"
+                 ErrorText="@ErrorText"
+                 SearchFunc="@Search"
+                 Variant="Variant.Outlined"
+                 ToStringFunc="@(e => e == null ? null : $"{e.Title}")">
+</MudAutocomplete>
+@code {
+    [Parameter]
+    public string? Label { get; set; }
+    [Parameter]
+    public bool Required { get; set; }
+    [Parameter]
+    public string? ErrorText { get; set; }
+
+    [Parameter]
+    public List<SelectEntity> DataSource { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<SelectEntity?> ValueChanged { get; set; }
+
+    public int? SelectedValue
+    {
+        set
+        {
+            SelectedEntity = DataSource.FirstOrDefault(x => x.Id == value);
+        }
+        get
+        {
+            return SelectedEntity?.Id;
+        }
+    }
+
+    public async Task<IEnumerable<SelectEntity>> Search(string searchString)
+    {
+        var data = new List<SelectEntity>();
+        await Task.Delay(100);
+        if (DataSource is null)
+        {
+            return data;
+        }
+        data = DataSource
+            .Where(x => x.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        return data;
+    }
+
+    private SelectEntity? _selectedEntity;
+    public SelectEntity? SelectedEntity
+    {
+        get => _selectedEntity;
+        set
+        {
+            if (_selectedEntity != value)
+            {
+                _selectedEntity = value;
+                ValueChanged.InvokeAsync(value);
+            }
+        }
+    }
+    private async Task OnValueChanged(SelectEntity? entity)
+    {
+        SelectedEntity = entity;
+    }
+    public void Clear()
+    {
+        SelectedEntity = new SelectEntity();
+    }
+}

@@ -1,0 +1,86 @@
+﻿@if (IsMultiple == true)
+{
+    <MudField Label="Select one or more File(s)" Style="color: #33461a !important;font-weight: bold !important;font-size: 18px !important;" Variant="Variant.Text">
+        <InputFile OnChange="@UploadFiles" multiple accept="image/x-png,image/jpeg,image/svg+xml,image/webp" style="color: #33461a !important;font-weight: bold !important;font-size: 15px !important;"></InputFile>
+    </MudField>
+}
+else
+{
+    <MudField Label="Select File" Variant="Variant.Text">
+        <InputFile OnChange="@LoadFile"></InputFile>
+    </MudField>
+}
+
+
+@code {
+    private IBrowserFile? file;
+    private IList<IBrowserFile> FilesList = new List<IBrowserFile>();
+
+    [Parameter]
+    public bool? IsMultiple { get; set; } = false;
+
+
+    private async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        file = e.File;
+    }
+
+    // for multiple Files
+    private async Task UploadFiles(InputFileChangeEventArgs e)
+    {
+        if (e.FileCount > 0)
+        {
+            var x = e.GetMultipleFiles().ToArray();
+            foreach (var f in e.GetMultipleFiles(e.FileCount))
+            {
+                FilesList.Add(f);
+            }
+
+        }
+
+    }
+    public async Task<IFormFile?> GetFile()
+    {
+        long maxAllowedSize = 1024 * 1024 * 10;
+        if (file != null && file.Size > 0)
+        {
+            await using (var fileStream = file.OpenReadStream(maxAllowedSize))
+            {
+                var memoryStream = new MemoryStream();
+                await fileStream.CopyToAsync(memoryStream);
+
+                return new FormFile(memoryStream, 0, memoryStream.Length, "file", file.Name);
+            }
+        }
+
+        return null;
+    }
+
+
+    // for multiple Files
+    public async Task<List<IFormFile>?> GetFiles()
+    {
+        long maxAllowedSize = 1024 * 1024 * 10;
+        List<IFormFile> files = new List<IFormFile>();
+        if (FilesList != null && FilesList.Any())
+        {
+            foreach (var file in FilesList)
+            {
+                if (file != null && file.Size > 0)
+                {
+                    await using (var fileStream = file.OpenReadStream(maxAllowedSize))
+                    {
+                        var memoryStream = new MemoryStream();
+                        await fileStream.CopyToAsync(memoryStream);
+
+                        files.Add(new FormFile(memoryStream, 0, memoryStream.Length, "file", file.Name));
+                    }
+                }
+            }
+            return files;
+        }
+
+        return null;
+    }
+
+}

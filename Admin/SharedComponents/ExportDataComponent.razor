@@ -1,0 +1,42 @@
+﻿@typeparam T
+
+@if (MudGrid != null && MudGrid.FilteredItems.Any())
+{
+    <OverlayComponent @ref="overlay" />
+    <MudFab Color="Color.Success" StartIcon="@Icons.Material.Filled.CloudDownload" OnClick="DownloadData" />
+}
+@code {
+    [Parameter]
+    public string? FileName { get; set; }
+
+    [Parameter]
+    public MudDataGrid<T>? MudGrid { get; set; }
+
+    [Parameter]
+    public string? Columns { get; set; }
+
+    OverlayComponent overlay = default!;
+    async Task DownloadData()
+    {
+        try
+        {
+            if (MudGrid != null && MudGrid.FilteredItems.Any())
+            {
+                await overlay.ShowLoading();
+
+                var dataTable = MudGrid.FilteredItems.ToDataTable();
+                var columns = !string.IsNullOrEmpty(Columns) ? Columns.Split(',', StringSplitOptions.RemoveEmptyEntries) : MudGrid.RenderedColumns.Where(x => x.CellTemplate is null).Select(x => x.PropertyName);
+                dataTable = dataTable.DefaultView.ToTable(false, columns.ToArray());
+
+                var stream = dataTable.GetExcelStream();
+                var fileName = $"{FileName}.xlsx";
+                await jScript.SaveAsFile(fileName, stream);
+
+                await overlay.HideLoading();
+            }
+        }
+        catch
+        {
+        }
+    }
+}

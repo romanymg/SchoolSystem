@@ -1,0 +1,74 @@
+﻿@page "/Login"
+@using Admin.Helpers
+@layout _BlankLayout
+@inject AuthenticationStateProvider _authService
+
+
+<EditForm method="post" FormName="login" Model="@model" OnValidSubmit="doLogin">
+    <DataAnnotationsValidator />
+    <MudGrid Justify="Justify.Center" Class="mt-10">
+        <MudItem sm="12" md="6">
+            <MudCard>
+                <MudCardHeader Class="!bg-white flex justify-center">
+                    <MudImage src="@(_currentRequest.BaseUrl+"/images/logo.jpg")" Class="max-h-[150px]" />
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudTextField Variant="Variant.Outlined" Label="User Name"
+                                  @bind-Value="model.UserName"
+                                  For="@(() => model.UserName)" />
+                    <MudTextField Variant="Variant.Outlined" Label="Password"
+                                  @bind-Value="model.Password"
+                                  For="@(() => model.Password)"
+                                  InputType="InputType.Password" />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Class="ml-auto">Login</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
+<MudOverlay ZIndex="10000" Visible="loading" Variant="Variant.Filled" DarkBackground="true">
+    <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+</MudOverlay>
+
+
+
+@code {
+    bool loading = false;
+
+    LoginEntity model = new LoginEntity();
+    protected override async Task OnAfterRenderAsync(bool firstrender)
+    {
+        if (firstrender)
+        {
+            await ServiceProvider.Get<AuthService>().LogoutAsync();
+
+            loading = false;
+            StateHasChanged();
+        }
+    }
+    private async Task doLogin()
+    {
+        loading = true;
+        await Task.Delay(1);
+
+        var user = await _userService.AdminLogin(model);
+        if (user != null)
+        {
+            await ServiceProvider.Get<AuthService>().LoginAsync(user);
+            navigation.NavigateTo($"{_currentRequest.BaseUrl}/Home");
+        }
+        else
+        {
+            toast.Add("Invalid Login", Severity.Error);
+        }
+
+        loading = false;
+        StateHasChanged();
+    }
+}

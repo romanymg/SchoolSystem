@@ -1,39 +1,21 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Admin</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
+﻿<MudPaper Width="100%" Elevation="0" Class="py-3 pa-4 bg-gray-200">
+    <MudNavMenu Color="Color.Primary">
+        <MudNavLink Icon="@Icons.Material.Filled.Home" Href="@(_currentRequest.BaseUrl+"/Home")">Home</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.Settings" Href="@(_currentRequest.BaseUrl+"/Settings")">Settings</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.AccountBalanceWallet" Href="@(_currentRequest.BaseUrl+"/Transactions")">Transactions</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.SwapHorizontalCircle" Href="@(_currentRequest.BaseUrl+"/Transfer")">Transfer</MudNavLink>
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </div>
-    </nav>
-</div>
+        <MudNavLink Icon="@Icons.Material.Filled.Logout" Href="@(_currentRequest.BaseUrl+"/Login")">Logout</MudNavLink>
+    </MudNavMenu>
+</MudPaper>
 
 @code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        collapseNavMenu = !collapseNavMenu;
+        if (firstRender)
+        {
+            await js.InvokeVoidAsync("HideNavGroup");
+            StateHasChanged();
+        }
     }
 }

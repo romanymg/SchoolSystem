@@ -1,0 +1,20 @@
+﻿<MudOverlay ZIndex="10000" Visible="isLoading" DarkBackground="true">
+    <MudProgressCircular Color="MudBlazor.Color.Warning" Indeterminate="true" />
+</MudOverlay>
+@code {
+    bool isLoading = false;
+    public async Task ShowLoading()
+    {
+        isLoading = true;
+        await Task.Delay(100);
+
+        await InvokeAsync(StateHasChanged);
+    }
+    public async Task HideLoading()
+    {
+        isLoading = false;
+        await Task.Delay(100);
+
+        await InvokeAsync(StateHasChanged);
+    }
+}

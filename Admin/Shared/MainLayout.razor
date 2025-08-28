@@ -1,19 +1,80 @@
-﻿@inherits LayoutComponentBase
+﻿@using MudBlazor
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>Admin</PageTitle>
+<MudThemeProvider />
+<MudSnackbarProvider />
+<MudDialogProvider FullWidth="true"
+                   MaxWidth="MaxWidth.ExtraLarge"
+                   CloseButton="true"
+                   DisableBackdropClick="true"
+                   Position="DialogPosition.Center"
+                   CloseOnEscapeKey="true" />
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            <MudLayout>
+                <MudAppBar Elevation="1">
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                    <MudText Typo="Typo.h5" Class="ml-3">
+                        <a href="@(_currentRequest.BaseUrl+"/Home")">
+                            <MudImage src="@(_currentRequest.BaseUrl+"/images/logo.jpg")" Class="h-[70px]" />
+                        </a>
+                    </MudText>
+                    <MudSpacer />
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+                    <MudMenu Icon="@Icons.Material.Filled.Person" Color="Color.Primary" Variant="Variant.Filled">
+                        <MudMenuItem>@_currentRequest.CurrentUserName</MudMenuItem>
+                        <MudMenuItem Href="@(_currentRequest.BaseUrl+"/ChangePassword")">Change Password</MudMenuItem>
+                        <MudMenuItem Href="@(_currentRequest.BaseUrl+"/Login")">Logout</MudMenuItem>
+                    </MudMenu>
+                </MudAppBar>
+                <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2" Class="bg-gray-200">
+                    <NavMenu />
+                </MudDrawer>
+                <MudMainContent>
+                    <CascadingValue Value="this">
+                        <div class="bg-gray-200 p-5 ml-1">
+                            <h2 class="font-bold text-lg mb-4">
+                                @PageTitle
+                            </h2>
+                            <div class="p-10 min-h-[100vh] bg-white p-5">
+                                @Body
+                            </div>
+                        </div>
+                    </CascadingValue>
+                </MudMainContent>
+            </MudLayout>
+        </Authorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>
+@code {
+    bool _drawerOpen = true;
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+    public string? PageTitle { get; set; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        //if (firstRender)
+        {
+            PageTitle = await js.InvokeAsync<string>("getTitle");
+            StateHasChanged();
+        }
+    }
+    protected override Task OnParametersSetAsync()
+    {
+        _drawerOpen = false;
+
+        return base.OnParametersSetAsync();
+    }
+}
+
+<script>
+    window.getTitle = () => {
+        return document.title;
+    };
+</script>
