@@ -43,5 +43,7 @@
         public string? Relationship { get; set; }
 
         public string? Country { get; set; }
+
+        public string? Childs { get; set; }
     }
 }

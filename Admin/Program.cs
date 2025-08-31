@@ -16,6 +16,14 @@ builder.Services.AddServerSideBlazor()
     .AddHubOptions(options => { options.MaximumReceiveMessageSize = 100 * 1024 * 1024; })
     .AddCircuitOptions(options => options.DetailedErrors = true);
 
+
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor().AddHubOptions(options =>
+{
+    options.MaximumReceiveMessageSize = 100 * 1024 * 1024;
+});
+
+
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication();
 builder.Services.AddMudServices();
@@ -24,10 +32,9 @@ builder.Services.AddLocalization();
 builder.Services.AddControllers();
 
 AddServices();
-
 AddMudServices();
-
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -45,6 +52,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

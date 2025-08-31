@@ -51,6 +51,8 @@ public partial class User
 
     public string? Country { get; set; }
 
+    public string? Childs { get; set; }
+
     public virtual ICollection<User> InverseParent { get; set; } = new List<User>();
 
     public virtual MediaFile? Mm { get; set; }

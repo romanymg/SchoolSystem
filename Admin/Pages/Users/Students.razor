@@ -4,7 +4,12 @@
 <PageTitle>Students</PageTitle>
 
 <div class="flex justify-end mb-3">
+    @if (ImportedCount > 0)
+    {
+        <MudText Typo="Typo.h3" Class="mr-5">Imported Count : @ImportedCount</MudText>
+    }
     <MudFab Color="Color.Warning" StartIcon="@Icons.Material.Filled.Download" OnClick="DownloadData" />
+    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Image" OnClick="DownloadCarts" />
 </div>
 <MudDataGrid T="UserEntity" Items="@gridData" RowsPerPage="25"
              QuickFilter="new Func<UserEntity, bool>(gridFilter.FilterData)" @bind-model="model">
@@ -12,6 +17,11 @@
         <MudTextField Variant="Variant.Outlined" @bind-Value="gridFilter.filterKey" Placeholder="Search" Adornment="Adornment.Start" Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <Columns>
+        <TemplateColumn CellClass="w-[80px]" Filterable="false">
+            <CellTemplate>
+                <MudImage Src="@context.Item.ImageUrl" Width="80"></MudImage>
+            </CellTemplate>
+        </TemplateColumn>
         <PropertyColumn Property="x => x.UserCode" Title="Code" />
         <PropertyColumn Property="x => x.FullName" Title="Name" />
         <PropertyColumn Property="x => x.DivisionName" Title="Division" />
@@ -46,6 +56,8 @@
 
     IEnumerable<UserEntity>? gridData = new List<UserEntity>();
     UserEntity model = new();
+    int ImportedCount = 0;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -56,6 +68,19 @@
 
             StateHasChanged();
         }
+    }
+
+    public string CreateFolderInWwwroot(string folderName)
+    {
+        var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var targetFolder = Path.Combine(wwwrootPath, folderName);
+
+        if (!Directory.Exists(targetFolder))
+        {
+            Directory.CreateDirectory(targetFolder);
+        }
+
+        return targetFolder;
     }
     async Task FillGrid()
     {
@@ -69,20 +94,45 @@
             return;
         }
 
+        ImportedCount = 0;
+
         await ShowLoading();
 
         try
         {
-            var zipPath = "Photo";
-            if (!Directory.Exists(zipPath))
-            {
-                Directory.CreateDirectory(zipPath);
-            }
-            var imagesPath = Path.Combine(zipPath, "StudentImages");
+            var photoPath = CreateFolderInWwwroot("Photos");
+            var imagesPath = Path.Combine(photoPath, "StudentImages");
 
-            _schoolIntegrationService.DownloadImages(zipPath, imagesPath);
+            var studentPath = Path.Combine("Photos", "StudentImages");
+            var parentPath = Path.Combine("Photos", "ParentImages");
+
+            _schoolIntegrationService.DownloadImages(photoPath, imagesPath);
 
             var schoolData = _schoolIntegrationService.GetSchoolData();
+
+            foreach (var pupil in schoolData.Pupils)
+            {
+                var entityPupil = new UserEntity
+                {
+                    UserTypeId = (int)UserTypeEnum.Student,
+
+                    UserCode = pupil.SchoolId,
+                    Title = pupil.Title,
+                    FullName = $"{pupil.Fullname}",
+                    DivisionName = pupil.DivisionName,
+                    Class = pupil.Form,
+                    ImageUrl = Path.Combine(studentPath, $"{pupil.Id}.png"),
+                    Dob = pupil.DOB,
+                    FamilyId = pupil.FamilyId,
+                    Phone = pupil.MobileNumber,
+                    Email = pupil.EmailAddress,
+                    ReferenceId = pupil.Id.ToString(),
+                };
+                await _userService.SaveUser(entityPupil);
+                ImportedCount++;
+
+                StateHasChanged();
+            }
 
             foreach (var parent in schoolData.Contacts)
             {
@@ -94,33 +144,12 @@
                     Relationship = parent.Relationship,
                     Country = parent.Country,
                     ReferenceId = parent.Id.ToString(),
+                    Childs = string.Join(",", parent.PupilIds.OrderBy(x => x))
                 };
-                var parentId = await _userService.AddUser(entityParent);
+                await _userService.SaveUser(entityParent);
+                ImportedCount++;
 
-                foreach (var pupilId in parent.PupilIds)
-                {
-                    var pupil = schoolData.Pupils.FirstOrDefault(x => x.SchoolId == pupilId);
-                    if (pupil != null)
-                    {
-                        var entityPupil = new UserEntity
-                        {
-                            UserTypeId = (int)UserTypeEnum.Student,
-                            ParentId = parentId,
-                            UserCode = pupil.SchoolId,
-                            Title = pupil.Title,
-                            FullName = $"{pupil.Fullname}",
-                            DivisionName = pupil.DivisionName,
-                            Class = pupil.Form,
-                            ImageUrl = Path.Combine(imagesPath, $"{pupil.Id}.png"),
-                            Dob = pupil.DOB,
-                            FamilyId = pupil.FamilyId,
-                            Phone = pupil.MobileNumber,
-                            Email = pupil.EmailAddress,
-                            ReferenceId = pupil.Id.ToString(),
-                        };
-                        await _userService.AddUser(entityPupil);
-                    }
-                }
+                StateHasChanged();
             }
 
             toast.Add("Users Imported Successfully", Severity.Success);
@@ -135,5 +164,10 @@
         await FillGrid();
         await HideLoading();
         StateHasChanged();
+    }
+
+    async Task DownloadCarts()
+    {
+
     }
 }

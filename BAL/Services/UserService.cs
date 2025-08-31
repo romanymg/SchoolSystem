@@ -2,6 +2,7 @@
 using Common.Helpers;
 using Common.Models;
 using DAL;
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.EntityFrameworkCore;
 
 namespace BAL.Services
@@ -73,39 +74,62 @@ namespace BAL.Services
                 }).ToListAsync();
         }
 
-        public async Task<long> AddUser(UserEntity model)
+        public async Task<long> SaveUser(UserEntity model)
         {
-            long userId = await context.Users
-                .Where(x => x.IsDeleted != true && x.ReferenceId == model.ReferenceId)
-                .Select(x => x.Id)
+            var entity = await context.Users
+                .Where(x => x.IsDeleted != true && x.UserTypeId == model.UserTypeId && x.ReferenceId == model.ReferenceId)
                 .FirstOrDefaultAsync();
 
-            if (userId > 0)
+            if (entity != null)
             {
-                return userId;
+                entity.FullName = model.FullName;
+                entity.UserName = model.UserName;
+                entity.Phone = model.Phone;
+                entity.Email = model.Email;
+                entity.DivisionName = model.DivisionName;
+                entity.Class = model.Class;
+                entity.IsActive = model.IsActive;
+                entity.UserTypeId = model.UserTypeId;
+                entity.Dob = model.Dob;
+                entity.FamilyId = model.FamilyId;
+                entity.ParentId = model.ParentId;
+                entity.GenderId = model.GenderId;
+                entity.UserCode = model.UserCode;
+                entity.ImageUrl = model.ImageUrl;
+                entity.ReferenceId = model.ReferenceId;
+                entity.Title = model.Title;
+                entity.Relationship = model.Relationship;
+                entity.Country = model.Country;
+                entity.Childs = model.Childs;
+                context.Entry(entity).State = EntityState.Modified;
             }
-            var entity = new User
+            else
             {
-                FullName = model.FullName,
-                UserName = model.UserName,
-                Phone = model.Phone,
-                Email = model.Email,
-                DivisionName = model.DivisionName,
-                Class = model.Class,
-                IsActive = model.IsActive,
-                UserTypeId = model.UserTypeId,
-                Dob = model.Dob,
-                FamilyId = model.FamilyId,
-                ParentId = model.ParentId,
-                GenderId = model.GenderId,
-                UserCode = model.UserCode,
-                ImageUrl = model.ImageUrl,
-                ReferenceId = model.ReferenceId,
-                Title = model.Title,
-                Relationship = model.Relationship,
-                Country = model.Country
-            };
-            context.Users.Add(entity);
+                entity = new User
+                {
+                    FullName = model.FullName,
+                    UserName = model.UserName,
+                    Phone = model.Phone,
+                    Email = model.Email,
+                    DivisionName = model.DivisionName,
+                    Class = model.Class,
+                    IsActive = model.IsActive,
+                    UserTypeId = model.UserTypeId,
+                    Dob = model.Dob,
+                    FamilyId = model.FamilyId,
+                    ParentId = model.ParentId,
+                    GenderId = model.GenderId,
+                    UserCode = model.UserCode,
+                    ImageUrl = model.ImageUrl,
+                    ReferenceId = model.ReferenceId,
+                    Title = model.Title,
+                    Relationship = model.Relationship,
+                    Country = model.Country,
+                    Childs = model.Childs,
+                };
+                context.Users.Add(entity);
+            }
+
             var saved = await context.SaveChangesAsync();
             if (saved > 0)
             {
