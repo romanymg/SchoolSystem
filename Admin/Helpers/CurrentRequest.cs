@@ -17,6 +17,8 @@ namespace Admin.Helpers
         }
 
         public string? BaseUrl => _configuration["Settings:BaseUrl"] ?? "";
+        public string? PhotoPath => _configuration["Settings:PhotoPath"] ?? "";
+
         public string? Host => _httpContextAccessor.HttpContext?.Request.Host.ToString();
         public string? UserIp => _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
         public string? Origin

@@ -6,6 +6,7 @@ namespace Common.Helpers
     public interface ICurrentRequest
     {
         public string? BaseUrl { get; }
+        public string? PhotoPath { get; }
         public string? Host { get; }
         public string? UserIp { get; }
         public string? Origin { get; }

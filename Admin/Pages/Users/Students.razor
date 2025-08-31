@@ -1,0 +1,139 @@
+﻿@page "/Students"
+@using Common.Enums
+
+<PageTitle>Students</PageTitle>
+
+<div class="flex justify-end mb-3">
+    <MudFab Color="Color.Warning" StartIcon="@Icons.Material.Filled.Download" OnClick="DownloadData" />
+</div>
+<MudDataGrid T="UserEntity" Items="@gridData" RowsPerPage="25"
+             QuickFilter="new Func<UserEntity, bool>(gridFilter.FilterData)" @bind-model="model">
+    <ToolBarContent>
+        <MudTextField Variant="Variant.Outlined" @bind-Value="gridFilter.filterKey" Placeholder="Search" Adornment="Adornment.Start" Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.UserCode" Title="Code" />
+        <PropertyColumn Property="x => x.FullName" Title="Name" />
+        <PropertyColumn Property="x => x.DivisionName" Title="Division" />
+        <PropertyColumn Property="x => x.Class" Title="Class" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="UserEntity" />
+    </PagerContent>
+</MudDataGrid>
+
+<MudOverlay ZIndex="10000" Visible="isLoading" DarkBackground="true" Absolute="true">
+    <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+</MudOverlay>
+@code {
+    bool isLoading = true;
+    public async Task ShowLoading()
+    {
+        isLoading = true;
+        await Task.Delay(100);
+        StateHasChanged();
+    }
+    public async Task HideLoading()
+    {
+        isLoading = false;
+        await Task.Delay(100);
+        StateHasChanged();
+    }
+}
+
+@code {
+    public int UserTypeId { get; set; } = (int)UserTypeEnum.Student;
+
+    IEnumerable<UserEntity>? gridData = new List<UserEntity>();
+    UserEntity model = new();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await FillGrid();
+
+            await HideLoading();
+
+            StateHasChanged();
+        }
+    }
+    async Task FillGrid()
+    {
+        gridData = await _userService.GetAll(UserTypeId);
+    }
+    async Task DownloadData()
+    {
+        bool confirmed = await jScript.Confirm("Are you sure?");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        await ShowLoading();
+
+        try
+        {
+            var zipPath = "/wwwroot/Photo";
+            if (!Directory.Exists(zipPath))
+            {
+                Directory.CreateDirectory(zipPath);
+            }
+            var imagesPath = Path.Combine(zipPath, "StudentImages");
+
+            _schoolIntegrationService.DownloadImages(zipPath, imagesPath);
+
+            var schoolData = _schoolIntegrationService.GetSchoolData();
+
+            foreach (var parent in schoolData.Contacts)
+            {
+                var entityParent = new UserEntity
+                {
+                    UserTypeId = (int)UserTypeEnum.Parent,
+                    FullName = $"{parent.Forename} {parent.MiddleNames} {parent.Surname}",
+                    Title = parent.Title,
+                    Relationship = parent.Relationship,
+                    Country = parent.Country,
+                    ReferenceId = parent.Id.ToString(),
+                };
+                var parentId = await _userService.AddUser(entityParent);
+
+                foreach (var pupilId in parent.PupilIds)
+                {
+                    var pupil = schoolData.Pupils.FirstOrDefault(x => x.SchoolId == pupilId);
+                    if (pupil != null)
+                    {
+                        var entityPupil = new UserEntity
+                        {
+                            UserTypeId = (int)UserTypeEnum.Student,
+                            ParentId = parentId,
+                            UserCode = pupil.SchoolId,
+                            Title = pupil.Title,
+                            FullName = $"{pupil.Fullname}",
+                            DivisionName = pupil.DivisionName,
+                            Class = pupil.Form,
+                            ImageUrl = Path.Combine(imagesPath, $"{pupil.Id}.png"),
+                            Dob = pupil.DOB,
+                            FamilyId = pupil.FamilyId,
+                            Phone = pupil.MobileNumber,
+                            Email = pupil.EmailAddress,
+                            ReferenceId = pupil.Id.ToString(),
+                        };
+                        await _userService.AddUser(entityPupil);
+                    }
+                }
+            }
+
+            toast.Add("Users Imported Successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            toast.Add(ex.Message, Severity.Error);
+            await HideLoading();
+            return;
+        }
+
+        await FillGrid();
+        await HideLoading();
+        StateHasChanged();
+    }
+}

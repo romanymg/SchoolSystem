@@ -12,11 +12,9 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor().AddHubOptions(options =>
-{
-    options.MaximumReceiveMessageSize = 100 * 1024 * 1024;
-});
-
+builder.Services.AddServerSideBlazor()
+    .AddHubOptions(options => { options.MaximumReceiveMessageSize = 100 * 1024 * 1024; })
+    .AddCircuitOptions(options => options.DetailedErrors = true);
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication();
@@ -71,6 +69,7 @@ void AddServices()
     }
 
     builder.Services.AddScoped<UserService>();
+    builder.Services.AddScoped<SchoolIntegrationService>();
 }
 
 void AddMudServices()

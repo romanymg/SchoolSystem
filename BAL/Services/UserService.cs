@@ -1,28 +1,20 @@
-﻿using Common.Models;
+﻿using Common.Enums;
+using Common.Helpers;
+using Common.Models;
 using DAL;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
-using Common.Helpers;
-using Google.Authenticator;
 
 namespace BAL.Services
 {
-    public class UserService
+    public class UserService(DBContext context, ICurrentRequest currentRequest)
     {
-        private readonly DBContext _context;
-        private readonly ICurrentRequest _currentRequest;
-
-        public UserService(DBContext context, ICurrentRequest currentRequest)
-        {
-            _context = context;
-            _currentRequest = currentRequest;
-        }
-
         public async Task<AdminEntity?> AdminLogin(LoginEntity model)
         {
-            var user = await _context.Users
+            var user = await context.Users
                 .FirstOrDefaultAsync(x => x.IsDeleted != true &&
-                                          x.UserName == model.UserName && x.Password == model.Password);
+                                          x.UserTypeId == (int)UserTypeEnum.Admin &&
+                                          x.UserName == model.UserName &&
+                                          x.Password == model.Password);
             if (user is null)
             {
                 return null;
@@ -36,7 +28,7 @@ namespace BAL.Services
         }
         public async Task<bool> ChangeAdminPassword(long userId, ChangePasswordEntity model)
         {
-            var user = await _context.Users
+            var user = await context.Users
                 .FirstOrDefaultAsync(x => x.IsDeleted != true &&
                                           x.Id == userId &&
                                           x.Password == model.Password);
@@ -46,10 +38,81 @@ namespace BAL.Services
             }
 
             user.Password = model.NewPassword;
-            _context.Entry(user).State = EntityState.Modified;
-            var res = await _context.SaveChangesAsync();
+            context.Entry(user).State = EntityState.Modified;
+            var res = await context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<IEnumerable<UserEntity>> GetAll(int userTypeId)
+        {
+            return await context.Users
+                .Where(x => x.IsDeleted != true &&
+                            x.UserTypeId == userTypeId)
+                .Select(x => new UserEntity
+                {
+                    Id = x.Id,
+                    FullName = x.FullName,
+                    UserName = x.UserName,
+                    Phone = x.Phone,
+                    Email = x.Email,
+                    DivisionName = x.DivisionName,
+                    Class = x.Class,
+                    IsActive = x.IsActive,
+                    UserTypeId = x.UserTypeId,
+                    Dob = x.Dob,
+                    FamilyId = x.FamilyId,
+                    ParentId = x.ParentId,
+                    GenderId = x.GenderId,
+                    UserCode = x.UserCode,
+                    ImageUrl = x.ImageUrl,
+                    ReferenceId = x.ReferenceId,
+                    Title = x.Title,
+                    Relationship = x.Relationship,
+                    Country = x.Country
+                }).ToListAsync();
+        }
+
+        public async Task<long> AddUser(UserEntity model)
+        {
+            long userId = await context.Users
+                .Where(x => x.IsDeleted != true && x.ReferenceId == model.ReferenceId)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
+
+            if (userId > 0)
+            {
+                return userId;
+            }
+            var entity = new User
+            {
+                FullName = model.FullName,
+                UserName = model.UserName,
+                Phone = model.Phone,
+                Email = model.Email,
+                DivisionName = model.DivisionName,
+                Class = model.Class,
+                IsActive = model.IsActive,
+                UserTypeId = model.UserTypeId,
+                Dob = model.Dob,
+                FamilyId = model.FamilyId,
+                ParentId = model.ParentId,
+                GenderId = model.GenderId,
+                UserCode = model.UserCode,
+                ImageUrl = model.ImageUrl,
+                ReferenceId = model.ReferenceId,
+                Title = model.Title,
+                Relationship = model.Relationship,
+                Country = model.Country
+            };
+            context.Users.Add(entity);
+            var saved = await context.SaveChangesAsync();
+            if (saved > 0)
+            {
+                return entity.Id;
+            }
+
+            throw new InvalidDataException("Invalid Request");
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAL;
 
@@ -36,37 +38,44 @@ public partial class DBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Users__3214EC077FECF2F6");
 
-            entity.HasIndex(e => e.UserCode, "UQ__Users__1DF52D0CB8DE7374").IsUnique();
-
-            entity.Property(e => e.AcademicHouse).HasMaxLength(100);
-            entity.Property(e => e.Class).HasMaxLength(20);
-            entity.Property(e => e.DivisionName).HasMaxLength(100);
-            entity.Property(e => e.Dob).HasColumnName("DOB");
-            entity.Property(e => e.Email).HasMaxLength(200);
-            entity.Property(e => e.FirstName).HasMaxLength(100);
-            entity.Property(e => e.FourthName).HasMaxLength(100);
-            entity.Property(e => e.FullName)
-                .HasMaxLength(403)
-                .HasComputedColumnSql("(ltrim(rtrim((((((isnull([FirstName],'')+' ')+isnull([SecondName],''))+' ')+isnull([ThirdName],''))+' ')+isnull([FourthName],''))))", true);
-            entity.Property(e => e.Gender)
-                .HasMaxLength(1)
-                .IsUnicode(false)
-                .IsFixedLength();
+            entity.Property(e => e.Class)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Country)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.DivisionName)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.Dob).HasColumnType("datetime");
+            entity.Property(e => e.Email)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.FamilyId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.FullName).HasMaxLength(500);
             entity.Property(e => e.InsertDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
-            entity.Property(e => e.Languages).HasMaxLength(200);
             entity.Property(e => e.Mmid).HasColumnName("MMID");
-            entity.Property(e => e.Nationalities).HasMaxLength(200);
             entity.Property(e => e.Password)
                 .HasMaxLength(100)
                 .IsUnicode(false);
-            entity.Property(e => e.Phone).HasMaxLength(50);
-            entity.Property(e => e.SecondName).HasMaxLength(100);
-            entity.Property(e => e.ThirdName).HasMaxLength(100);
-            entity.Property(e => e.Tutor).HasMaxLength(100);
+            entity.Property(e => e.Phone)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.ReferenceId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Relationship)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Title)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.UserCode).HasMaxLength(50);
             entity.Property(e => e.UserName)
                 .HasMaxLength(100)

@@ -1,0 +1,61 @@
+﻿@page "/Parents"
+@using Common.Enums
+
+<PageTitle>Parents</PageTitle>
+
+<MudDataGrid T="UserEntity" Items="@gridData" RowsPerPage="25"
+             QuickFilter="new Func<UserEntity, bool>(gridFilter.FilterData)" @bind-model="model">
+    <ToolBarContent>
+        <MudTextField Variant="Variant.Outlined" @bind-Value="gridFilter.filterKey" Placeholder="Search" Adornment="Adornment.Start" Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Title" Title="Title" />
+        <PropertyColumn Property="x => x.FullName" Title="Name" />
+        <PropertyColumn Property="x => x.Relationship" Title="Relationship" />
+        <PropertyColumn Property="x => x.Country" Title="Country" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="UserEntity" />
+    </PagerContent>
+</MudDataGrid>
+
+<MudOverlay ZIndex="10000" Visible="isLoading" DarkBackground="true" Absolute="true">
+    <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+</MudOverlay>
+@code {
+    bool isLoading = true;
+    public async Task ShowLoading()
+    {
+        isLoading = true;
+        await Task.Delay(100);
+        StateHasChanged();
+    }
+    public async Task HideLoading()
+    {
+        isLoading = false;
+        await Task.Delay(100);
+        StateHasChanged();
+    }
+}
+
+@code {
+    public int UserTypeId { get; set; } = (int)UserTypeEnum.Parent;
+
+    IEnumerable<UserEntity>? gridData = new List<UserEntity>();
+    UserEntity model = new();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await FillGrid();
+
+            await HideLoading();
+
+            StateHasChanged();
+        }
+    }
+    async Task FillGrid()
+    {
+        gridData = await _userService.GetAll(UserTypeId);
+    }
+}
