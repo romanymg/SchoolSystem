@@ -9,7 +9,6 @@
         <MudText Typo="Typo.h3" Class="mr-5">Imported Count : @ImportedCount</MudText>
     }
     <MudFab Color="Color.Warning" StartIcon="@Icons.Material.Filled.Download" OnClick="DownloadData" />
-    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Image" OnClick="DownloadCarts" />
 </div>
 <MudDataGrid T="UserEntity" Items="@gridData" RowsPerPage="25"
              QuickFilter="new Func<UserEntity, bool>(gridFilter.FilterData)" @bind-model="model">
@@ -164,10 +163,5 @@
         await FillGrid();
         await HideLoading();
         StateHasChanged();
-    }
-
-    async Task DownloadCarts()
-    {
-
     }
 }
