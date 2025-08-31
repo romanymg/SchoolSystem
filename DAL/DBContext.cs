@@ -15,6 +15,8 @@ public partial class DBContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<UserRelation> UserRelations { get; set; }
+
     public virtual DbSet<UserType> UserTypes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
