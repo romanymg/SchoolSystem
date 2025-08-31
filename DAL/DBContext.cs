@@ -40,6 +40,9 @@ public partial class DBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Users__3214EC077FECF2F6");
 
+            entity.Property(e => e.CardNumber)
+                .HasMaxLength(100)
+                .IsUnicode(false);
             entity.Property(e => e.Class)
                 .HasMaxLength(100)
                 .IsUnicode(false);

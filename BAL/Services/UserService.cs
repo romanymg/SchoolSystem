@@ -70,7 +70,9 @@ namespace BAL.Services
                     ReferenceId = x.ReferenceId,
                     Title = x.Title,
                     Relationship = x.Relationship,
-                    Country = x.Country
+                    Country = x.Country,
+                    IsPrinted = x.IsPrinted ?? false,
+                    CardNumber = x.CardNumber
                 }).ToListAsync();
         }
 
@@ -137,6 +139,14 @@ namespace BAL.Services
             }
 
             throw new InvalidDataException("Invalid Request");
+        }
+
+        public async Task SetCardNumber(UserEntity item)
+        {
+            await context.Users.Where(x => x.IsDeleted != true && x.Id == item.Id)
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(p => p.CardNumber, item.CardNumber)
+                        .SetProperty(p => p.IsPrinted, item.IsPrinted));
         }
     }
 }

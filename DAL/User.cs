@@ -53,6 +53,10 @@ public partial class User
 
     public string? Childs { get; set; }
 
+    public bool? IsPrinted { get; set; }
+
+    public string? CardNumber { get; set; }
+
     public virtual ICollection<User> InverseParent { get; set; } = new List<User>();
 
     public virtual MediaFile? Mm { get; set; }

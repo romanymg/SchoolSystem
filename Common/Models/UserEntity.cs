@@ -45,5 +45,8 @@
         public string? Country { get; set; }
 
         public string? Childs { get; set; }
+
+        public bool IsPrinted { get; set; }
+        public string? CardNumber { get; set; }
     }
 }

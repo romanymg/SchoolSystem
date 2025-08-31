@@ -25,6 +25,16 @@
         <PropertyColumn Property="x => x.FullName" Title="Name" />
         <PropertyColumn Property="x => x.DivisionName" Title="Division" />
         <PropertyColumn Property="x => x.Class" Title="Class" />
+        <PropertyColumn Property="x => x.IsPrinted" Title="Printed" />
+        <TemplateColumn Filterable="false" Title="Card Number">
+            <CellTemplate>
+                <MudTextField Value="@context.Item.CardNumber"
+                              ValueChanged="@(async (string val) => await SaveCardNumber(val, context.Item))"
+                              Variant="Variant.Outlined" />
+
+            </CellTemplate>
+        </TemplateColumn>
+
     </Columns>
     <PagerContent>
         <MudDataGridPager T="UserEntity" />
@@ -164,4 +174,18 @@
         await HideLoading();
         StateHasChanged();
     }
+
+    private async Task SaveCardNumber(string value, UserEntity item)
+    {
+        await ShowLoading();
+        item.CardNumber = value;
+        item.IsPrinted = !string.IsNullOrEmpty(value);
+
+        await _userService.SetCardNumber(item);
+
+        await Task.CompletedTask;
+
+        await HideLoading();
+    }
+
 }
