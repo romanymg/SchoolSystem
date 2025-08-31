@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Admin", "Admin\Admin.csproj", "{A315F99C-037E-687F-5376-8EFA338F3D2E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintCardsApp", "PrintCardsApp\PrintCardsApp.csproj", "{B209C560-C659-81D9-62C2-D219AF0DD248}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintApp", "PrintApp\PrintApp.csproj", "{1CAED6B3-CFE7-4327-95F4-7AA195A3E0B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{A315F99C-037E-687F-5376-8EFA338F3D2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A315F99C-037E-687F-5376-8EFA338F3D2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A315F99C-037E-687F-5376-8EFA338F3D2E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B209C560-C659-81D9-62C2-D219AF0DD248}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B209C560-C659-81D9-62C2-D219AF0DD248}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B209C560-C659-81D9-62C2-D219AF0DD248}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B209C560-C659-81D9-62C2-D219AF0DD248}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CAED6B3-CFE7-4327-95F4-7AA195A3E0B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CAED6B3-CFE7-4327-95F4-7AA195A3E0B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CAED6B3-CFE7-4327-95F4-7AA195A3E0B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CAED6B3-CFE7-4327-95F4-7AA195A3E0B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
