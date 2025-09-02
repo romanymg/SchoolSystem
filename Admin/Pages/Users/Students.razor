@@ -1,4 +1,5 @@
 ﻿@page "/Students"
+@using Admin.SharedComponents
 @using Common.Enums
 
 <PageTitle>Students</PageTitle>
@@ -10,10 +11,12 @@
     }
     <MudFab Color="Color.Warning" StartIcon="@Icons.Material.Filled.Download" OnClick="DownloadData" />
 </div>
-<MudDataGrid T="UserEntity" Items="@gridData" RowsPerPage="25"
+<MudDataGrid @ref=grid T="UserEntity" Items="@gridData" RowsPerPage="25"
              QuickFilter="new Func<UserEntity, bool>(gridFilter.FilterData)" @bind-model="model">
     <ToolBarContent>
         <MudTextField Variant="Variant.Outlined" @bind-Value="gridFilter.filterKey" Placeholder="Search" Adornment="Adornment.Start" Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        <ExportDataComponent FileName="Students" MudGrid="grid" Columns="Id,UserCode,FullName,DivisionName,Class,CardNumber" />
+
     </ToolBarContent>
     <Columns>
         <TemplateColumn CellClass="w-[80px]" Filterable="false">
@@ -61,6 +64,8 @@
 }
 
 @code {
+    MudDataGrid<UserEntity> grid = new();
+
     public int UserTypeId { get; set; } = (int)UserTypeEnum.Student;
 
     IEnumerable<UserEntity>? gridData = new List<UserEntity>();
@@ -113,7 +118,6 @@
             var imagesPath = Path.Combine(photoPath, "StudentImages");
 
             var studentPath = Path.Combine("Photos", "StudentImages");
-            var parentPath = Path.Combine("Photos", "ParentImages");
 
             _schoolIntegrationService.DownloadImages(photoPath, imagesPath);
 

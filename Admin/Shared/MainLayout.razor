@@ -17,12 +17,7 @@
             <MudLayout>
                 <MudAppBar Elevation="1">
                     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-                    <MudText Typo="Typo.h5" Class="ml-3">
-                        <a href="@(_currentRequest.BaseUrl+"/Home")">
-                            <MudImage src="@(_currentRequest.BaseUrl+"/images/logo.jpg")" Class="h-[70px]" />
-                        </a>
-                    </MudText>
-                    <MudSpacer />
+                   <MudSpacer />
 
                     <MudMenu Icon="@Icons.Material.Filled.Person" Color="Color.Primary" Variant="Variant.Filled">
                         <MudMenuItem>@_currentRequest.CurrentUserName</MudMenuItem>
@@ -30,7 +25,12 @@
                         <MudMenuItem Href="@(_currentRequest.BaseUrl+"/Login")">Logout</MudMenuItem>
                     </MudMenu>
                 </MudAppBar>
-                <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2" Class="bg-gray-200">
+                <MudDrawer @bind-Open="_drawerOpen" Elevation="2" Class="bg-gray-200">
+                    <MudDrawerHeader>
+                        <a href="@(_currentRequest.BaseUrl + "/Home")">
+                            <MudImage src="@(_currentRequest.BaseUrl + "/images/logo.jpg")" Class="w-100" />
+                        </a>
+                    </MudDrawerHeader>
                     <NavMenu />
                 </MudDrawer>
                 <MudMainContent>

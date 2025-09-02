@@ -72,7 +72,8 @@ namespace BAL.Services
                     Relationship = x.Relationship,
                     Country = x.Country,
                     IsPrinted = x.IsPrinted ?? false,
-                    CardNumber = x.CardNumber
+                    CardNumber = x.CardNumber,
+                    Childs = x.Childs,
                 }).ToListAsync();
         }
 
@@ -148,5 +149,12 @@ namespace BAL.Services
                     x.SetProperty(p => p.CardNumber, item.CardNumber)
                         .SetProperty(p => p.IsPrinted, item.IsPrinted));
         }
+        public async Task SetImageUrl(UserEntity item)
+        {
+            await context.Users.Where(x => x.IsDeleted != true && x.Id == item.Id)
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(p => p.ImageUrl, item.ImageUrl));
+        }
+
     }
 }

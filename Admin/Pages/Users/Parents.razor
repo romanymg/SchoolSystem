@@ -1,23 +1,61 @@
 ﻿@page "/Parents"
+@using Admin.SharedComponents
 @using Common.Enums
 
 <PageTitle>Parents</PageTitle>
 
-<MudDataGrid T="UserEntity" Items="@gridData" RowsPerPage="25"
+<MudDataGrid @ref=grid T="UserEntity" Items="@gridData" RowsPerPage="25"
              QuickFilter="new Func<UserEntity, bool>(gridFilter.FilterData)" @bind-model="model">
     <ToolBarContent>
         <MudTextField Variant="Variant.Outlined" @bind-Value="gridFilter.filterKey" Placeholder="Search" Adornment="Adornment.Start" Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-    </ToolBarContent>
+        <ExportDataComponent FileName="Parents" MudGrid="grid" Columns="Id,Title,FullName,Relationship,Country,Childs" />
+
+        </ToolBarContent>
     <Columns>
+        <TemplateColumn CellClass="w-[80px]" Filterable="false">
+            <CellTemplate>
+                <MudImage Src="@context.Item.ImageUrl" Width="80"></MudImage>
+            </CellTemplate>
+        </TemplateColumn>
         <PropertyColumn Property="x => x.Title" Title="Title" />
         <PropertyColumn Property="x => x.FullName" Title="Name" />
         <PropertyColumn Property="x => x.Relationship" Title="Relationship" />
         <PropertyColumn Property="x => x.Country" Title="Country" />
+        <TemplateColumn Title="Children" CellClass="w-[80px]">
+            <CellTemplate>
+                @context.Item.Childs.Replace(",",", ")
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn CellClass="w-[50px]" Filterable="false">
+            <CellTemplate>
+                <MudIconButton Icon="@Icons.Material.Filled.Image"
+                               Color="Color.Warning"
+                               Variant="Variant.Filled"
+                               OnClick="() => EditUser(context.Item)">
+
+                </MudIconButton>
+            </CellTemplate>
+        </TemplateColumn>
     </Columns>
     <PagerContent>
         <MudDataGridPager T="UserEntity" />
     </PagerContent>
-</MudDataGrid>
+</MudDataGrid><MudDialog @bind-IsVisible="popVisability" Class="w-full lg:w-1/2">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3" /> Change Photo
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm>
+            <MudGrid>
+                <MudItem xs="12" md="6" lg="4">
+                    <InputFile OnChange="@LoadFile"></InputFile>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+</MudDialog>
 
 <MudOverlay ZIndex="10000" Visible="isLoading" DarkBackground="true" Absolute="true">
     <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
@@ -39,10 +77,15 @@
 }
 
 @code {
+    MudDataGrid<UserEntity> grid = new();
+
     public int UserTypeId { get; set; } = (int)UserTypeEnum.Parent;
 
     IEnumerable<UserEntity>? gridData = new List<UserEntity>();
     UserEntity model = new();
+    bool popVisability = false;
+
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -54,8 +97,60 @@
             StateHasChanged();
         }
     }
+
     async Task FillGrid()
     {
         gridData = await _userService.GetAll(UserTypeId);
     }
+
+    async Task EditUser(UserEntity user)
+    {
+        popVisability = true;
+        model = user;
+    }
+
+    private async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        // الامتداد من الملف الأصلي
+        var extension = Path.GetExtension(file.Name);
+
+        // اسم الملف = model.Id + الامتداد
+        var fileName = $"{model.Id}{extension}";
+
+        // المسار الفعلي لمجلد wwwroot\Photos\ParentImages
+        var parentFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Photos", "ParentImages");
+
+        // إنشاء المجلد إذا لم يكن موجودًا
+        if (!Directory.Exists(parentFolder))
+        {
+            Directory.CreateDirectory(parentFolder);
+        }
+
+        // المسار الفعلي الكامل للملف
+        var physicalPath = Path.Combine(parentFolder, fileName);
+
+        // المسار النسبي الذي سيُخزن في الداتابيز (بدون wwwroot)
+        var relativePath = Path.Combine("Photos", "ParentImages", fileName).Replace("\\", "/");
+
+        // حفظ الصورة في السيرفر
+        using (var stream = new FileStream(physicalPath, FileMode.Create))
+        {
+            await file.OpenReadStream().CopyToAsync(stream);
+        }
+
+        // حفظ الرابط في الداتابيز
+        model.ImageUrl = "/" + relativePath;
+        await _userService.SetImageUrl(model);
+
+        toast.Add("Image Saved Successfully", Severity.Success);
+
+        popVisability = false;
+        model = new UserEntity();
+    }
+
+
+
+
 }
