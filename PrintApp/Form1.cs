@@ -1,8 +1,9 @@
+using Common.Enums;
+using Common.Models;
 using PrintApp.Services;
 using System.Configuration;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using Common.Models;
 
 namespace PrintApp
 {
@@ -37,20 +38,52 @@ namespace PrintApp
 
         void StartLogic()
         {
-            if (rbStudent.Checked)
+            int printed = rbNotPrinted.Checked ? 0 : -1;
+            string code = txtCode.Text.Trim();
+
+            int userType = rbStudent.Checked ? (int)UserTypeEnum.Student : (int)UserTypeEnum.Parent;
+
+            this.BeginInvoke((MethodInvoker)delegate ()
             {
-                var result = appServices.GetStudents().Result;
+                lblStatus.Text = $"Loading data...";
+            });
+
+            try
+            {
+                var result = appServices.GetUsers(userType, printed, code).Result;
+
+                if (!result.Any())
+                {
+                    this.BeginInvoke((MethodInvoker)delegate ()
+                    {
+                        lblStatus.Text = $"No Data";
+                    });
+                    return;
+                }
+
                 foreach (var row in result)
                 {
                     this.BeginInvoke((MethodInvoker)delegate ()
                     {
-                        lblStatus.Text = $"{row.FullName}";
+                        lblStatus.Text = $"Processing: {row.FullName}";
                     });
 
-                    DrawStudent(row);
+                    if (userType == (int)UserTypeEnum.Student)
+                        DrawStudent(row);
+                    else
+                        DrawParent(row);
                 }
+
+                this.BeginInvoke((MethodInvoker)delegate () { MessageBox.Show("Finished"); });
             }
-            this.BeginInvoke((MethodInvoker)delegate () { MessageBox.Show("Finished"); });
+            catch (Exception ex)
+            {
+                this.BeginInvoke((MethodInvoker)delegate ()
+                {
+                    MessageBox.Show($"Error: {ex.Message}");
+                });
+            }
+
         }
 
         void DrawStudent(UserEntity row)
@@ -104,8 +137,7 @@ namespace PrintApp
             }
         }
 
-        /*
-        void DrawParent(DataRow row)
+        void DrawParent(UserEntity row)
         {
             try
             {
@@ -114,12 +146,16 @@ namespace PrintApp
                 SolidBrush brush1 = new SolidBrush((Color)new ColorConverter().ConvertFromString("#091F13"));
                 SolidBrush brush2 = new SolidBrush((Color)new ColorConverter().ConvertFromString("#063721"));
 
-                string PersonName = row["ParentFirstName"].ToString() + " " + row["ParentSurname"].ToString();
-                var ParentTitle = row["ParentTitle"].ToString();
-                var PersonCode = row["ParentLoginCode"].ToString();
+                string PersonName = row.FullName;
+                var PersonCode = row.UserCode;
+                var imageUrl = $"{ApiUrl}{row.ImageUrl}";
                 //var students = dtData.AsEnumerable().Where(row => row["ParentLoginCode"].ToString() == PersonCode).CopyToDataTable();
 
-                var imageUrl = $"{ImagesPath}/{PersonCode}.jpg";
+                if (string.IsNullOrEmpty(imageUrl))
+                {
+                    return;
+                }
+
                 Image imgBk = Image.FromFile(backgroundImageUrl);
                 imgBk = ResizeImage(imgBk, 1000, 628);
                 HorizontalResolution = imgBk.HorizontalResolution;
@@ -130,7 +166,7 @@ namespace PrintApp
 
                 try
                 {
-                    Image imgPerson = Image.FromFile(imageUrl);
+                    Image imgPerson = LoadImageFromUrlAsync(imageUrl).Result;
                     imgPerson = ResizeImage(imgPerson, 253, 310);
                     objGrahpics.DrawImage(imgPerson, 700, 210);
                 }
@@ -142,6 +178,7 @@ namespace PrintApp
                 objGrahpics.DrawString($"PARENT NAME: {PersonName}", new Font("Brown Regular", 8, FontStyle.Bold),
                     brush1, new RectangleF(50, 250, imgBk.Width, 0),
                     new StringFormat { Alignment = StringAlignment.Near, FormatFlags = StringFormatFlags.NoWrap });
+
                 //if (students != null)
                 //{
                 //    objGrahpics.DrawString($"STUDENT NAME:", new Font("Brown Regular", 8, FontStyle.Bold), brush1, new RectangleF(50, 320, imgBk.Width, 0), new StringFormat { Alignment = StringAlignment.Near });
@@ -156,13 +193,13 @@ namespace PrintApp
                 //        objGrahpics.DrawString($"{stYear}", new Font("Brown Regular", 8, FontStyle.Bold), brush1, new RectangleF(600, y, 300, 0), new StringFormat { Alignment = StringAlignment.Near });
                 //    }
                 //}
+                imgBk = ResizeImage(imgBk, 600, 377);
                 SaveImageToHardDisk(imgBk, $"{PersonCode}.jpg");
             }
             catch (Exception ex)
             {
             }
         }
-        */
 
         float VerticalResolution = 0, HorizontalResolution = 0;
         public Bitmap ResizeImage(Image image, int width, int height)

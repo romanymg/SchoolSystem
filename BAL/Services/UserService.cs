@@ -45,11 +45,26 @@ namespace BAL.Services
             return true;
         }
 
-        public async Task<IEnumerable<UserEntity>> GetAll(int userTypeId)
+        public async Task<IEnumerable<UserEntity>> GetAll(int userTypeId, int printed = -1, string? code = null)
         {
-            return await context.Users
+            var query = context.Users
                 .Where(x => x.IsDeleted != true &&
-                            x.UserTypeId == userTypeId)
+                            x.UserTypeId == userTypeId);
+            if (printed == 0)
+            {
+                query = query.Where(x => x.IsPrinted != true);
+            }
+            else if (printed == 1)
+            {
+                query = query.Where(x => x.IsPrinted == true);
+            }
+
+            if (!string.IsNullOrEmpty(code))
+            {
+                query = query.Where(x => x.UserCode == code);
+            }
+
+            return await query
                 .Select(x => new UserEntity
                 {
                     Id = x.Id,

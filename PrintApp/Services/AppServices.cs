@@ -18,26 +18,33 @@ namespace PrintApp.Services
     {
         string ApiUrl = ConfigurationManager.AppSettings["ApiUrl"];
 
-        internal async Task<List<UserEntity>> GetStudents()
+        internal async Task<List<UserEntity>> GetUsers(int userTypeId, int printed, string code)
         {
-            string url = $"{ApiUrl}api/general/getstudents";
-
-            using (HttpClient client = new HttpClient())
+            try
             {
-                HttpResponseMessage response = await client.GetAsync(url);
-                response.EnsureSuccessStatusCode();
+                string url = $"{ApiUrl}Api/General/GetUsers?userTypeId={userTypeId}&printed={printed}&code={Uri.EscapeDataString(code)}";
 
-                string json = await response.Content.ReadAsStringAsync();
-
-                var options = new JsonSerializerOptions
+                using (HttpClient client = new HttpClient())
                 {
-                    PropertyNameCaseInsensitive = true
-                };
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    response.EnsureSuccessStatusCode();
 
-                var result = JsonSerializer.Deserialize<ApiResponse<List<UserEntity>>>(json, options);
-                return result?.Data ?? new List<UserEntity>();
+                    string json = await response.Content.ReadAsStringAsync();
+
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    var result = JsonSerializer.Deserialize<ApiResponse<List<UserEntity>>>(json, options);
+                    return result?.Data ?? new List<UserEntity>();
+                }
+
             }
-
+            catch (Exception e)
+            {
+                return new List<UserEntity>();
+            }
         }
 
     }

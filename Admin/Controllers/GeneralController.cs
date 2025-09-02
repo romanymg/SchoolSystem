@@ -1,6 +1,5 @@
 ﻿using BAL.Services;
 using Common.DTOs;
-using Common.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Admin.Controllers
@@ -9,10 +8,10 @@ namespace Admin.Controllers
     [ApiController]
     public class GeneralController(UserService userService) : ControllerBase
     {
-        [HttpGet("GetStudents")]
-        public async Task<IActionResult> GetStudents()
+        [HttpGet("GetUsers")]
+        public async Task<IActionResult> GetUsers(int userTypeId, int printed, string? code)
         {
-            var result = await userService.GetAll((int)UserTypeEnum.Student);
+            var result = await userService.GetAll(userTypeId, printed, code);
             return Ok(ApiResponse.OK(result));
         }
     }
