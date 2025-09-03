@@ -20,6 +20,11 @@ namespace PrintApp
         private void Form1_Load(object sender, EventArgs e)
         {
             //lblStatus.Text = appServices.ApiUrl;
+            //var list = Directory.GetFiles("C:\\Users\\Romany\\Desktop\\IDNew")
+            //    .Select(Path.GetFileName)
+            //    .ToList();
+
+            //var data =string.Join(" ", list.Select(x => $"('{x}'),"));
         }
 
         private void btnGenerate_Click(object sender, EventArgs e)
