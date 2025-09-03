@@ -49,4 +49,19 @@
         public bool IsPrinted { get; set; }
         public string? CardNumber { get; set; }
     }
+
+    public class UserPrintDto
+    {
+        public long Id { get; set; }
+        public string? UserCode { get; set; }
+        public string? FullName { get; set; }
+        public string? Class { get; set; }
+        public string? DivisionName { get; set; }
+        public string? FamilyId { get; set; }
+        public string? ReferenceId { get; set; }
+        public string? ImageUrl { get; set; }
+        public string? Title { get; set; }
+        public string? CardNumber { get; set; }
+        public List<UserPrintDto>? Children { get; set; }
+    }
 }

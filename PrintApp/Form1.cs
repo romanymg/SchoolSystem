@@ -85,7 +85,7 @@ namespace PrintApp
 
         }
 
-        void DrawStudent(UserEntity row)
+        void DrawStudent(UserPrintDto row)
         {
             try
             {
@@ -140,7 +140,7 @@ namespace PrintApp
             }
         }
 
-        void DrawParent(UserEntity row)
+        void DrawParent(UserPrintDto row)
         {
             try
             {
@@ -178,24 +178,24 @@ namespace PrintApp
                     return;
                 }
 
-                objGrahpics.DrawString($"PARENT NAME: {PersonName}", new Font("Brown Regular", 8, FontStyle.Bold),
+                objGrahpics.DrawString($"NAME: {PersonName}", new Font("Brown Regular", 8, FontStyle.Bold),
                     brush1, new RectangleF(50, 250, imgBk.Width, 0),
                     new StringFormat { Alignment = StringAlignment.Near, FormatFlags = StringFormatFlags.NoWrap });
 
-                //if (students != null)
-                //{
-                //    objGrahpics.DrawString($"STUDENT NAME:", new Font("Brown Regular", 8, FontStyle.Bold), brush1, new RectangleF(50, 320, imgBk.Width, 0), new StringFormat { Alignment = StringAlignment.Near });
+                if (row.Children != null && row.Children.Any())
+                {
+                    objGrahpics.DrawString($"STUDENT:", new Font("Brown Regular", 7, FontStyle.Bold), brush1, new RectangleF(50, 320, imgBk.Width, 0), new StringFormat { Alignment = StringAlignment.Near });
 
-                //    for (int i = 0; i < students.Rows.Count; i++)
-                //    {
-                //        var y = 320 + (50 * i);
-                //        var stName = students.Rows[i]["StudentFirstName"].ToString();
-                //        var stYear = students.Rows[i]["Year"].ToString();
+                    for (int i = 0; i < row.Children.Count; i++)
+                    {
+                        var y = 320 + (50 * i);
+                        var stName = row.Children[i].FullName;
+                        var stYear = row.Children[i].Class;
 
-                //        objGrahpics.DrawString($"{stName}", new Font("Brown Regular", 8, FontStyle.Bold), brush1, new RectangleF(350, y, 300, 0), new StringFormat { Alignment = StringAlignment.Near });
-                //        objGrahpics.DrawString($"{stYear}", new Font("Brown Regular", 8, FontStyle.Bold), brush1, new RectangleF(600, y, 300, 0), new StringFormat { Alignment = StringAlignment.Near });
-                //    }
-                //}
+                        objGrahpics.DrawString($"{stName}   {stYear}", new Font("Brown Regular", 7, FontStyle.Bold), brush1, new RectangleF(220, y, 500, 0), new StringFormat { Alignment = StringAlignment.Near });
+                        //objGrahpics.DrawString($"{stYear}", new Font("Brown Regular", 8, FontStyle.Bold), brush1, new RectangleF(600, y, 300, 0), new StringFormat { Alignment = StringAlignment.Near });
+                    }
+                }
                 imgBk = ResizeImage(imgBk, 600, 377);
                 SaveImageToHardDisk(imgBk, $"{PersonCode}.jpg");
             }

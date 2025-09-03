@@ -28,7 +28,7 @@ namespace PrintApp.Services
 
             ApiUrl = config["ApiUrl"];
         }
-        internal async Task<List<UserEntity>> GetUsers(int userTypeId, int printed, string code)
+        internal async Task<List<UserPrintDto>> GetUsers(int userTypeId, int printed, string code)
         {
             try
             {
@@ -46,14 +46,14 @@ namespace PrintApp.Services
                         PropertyNameCaseInsensitive = true
                     };
 
-                    var result = JsonSerializer.Deserialize<ApiResponse<List<UserEntity>>>(json, options);
-                    return result?.Data ?? new List<UserEntity>();
+                    var result = JsonSerializer.Deserialize<ApiResponse<List<UserPrintDto>>>(json, options);
+                    return result?.Data ?? new List<UserPrintDto>();
                 }
 
             }
             catch (Exception e)
             {
-                return new List<UserEntity>();
+                return new List<UserPrintDto>();
             }
         }
     }

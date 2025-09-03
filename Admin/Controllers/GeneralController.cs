@@ -11,7 +11,7 @@ namespace Admin.Controllers
         [HttpGet("GetUsers")]
         public async Task<IActionResult> GetUsers(int userTypeId, int printed, string? code)
         {
-            var result = await userService.GetAll(userTypeId, printed, code);
+            var result = await userService.GetForPrintCards(userTypeId, printed, code);
             return Ok(ApiResponse.OK(result));
         }
     }

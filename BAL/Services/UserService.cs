@@ -45,24 +45,11 @@ namespace BAL.Services
             return true;
         }
 
-        public async Task<IEnumerable<UserEntity>> GetAll(int userTypeId, int printed = -1, string? code = null)
+        public async Task<IEnumerable<UserEntity>> GetAll(int userTypeId)
         {
             var query = context.Users
                 .Where(x => x.IsDeleted != true &&
                             x.UserTypeId == userTypeId);
-            if (printed == 0)
-            {
-                query = query.Where(x => x.IsPrinted != true);
-            }
-            else if (printed == 1)
-            {
-                query = query.Where(x => x.IsPrinted == true);
-            }
-
-            if (!string.IsNullOrEmpty(code))
-            {
-                query = query.Where(x => x.UserCode == code);
-            }
 
             return await query
                 .Select(x => new UserEntity
@@ -169,6 +156,55 @@ namespace BAL.Services
             await context.Users.Where(x => x.IsDeleted != true && x.Id == item.Id)
                 .ExecuteUpdateAsync(x =>
                     x.SetProperty(p => p.ImageUrl, item.ImageUrl));
+        }
+
+
+
+        public async Task<IEnumerable<UserPrintDto>> GetForPrintCards(int userTypeId, int printed = -1, string? code = null)
+        {
+            var query = context.Users
+                .Where(x => x.IsDeleted != true &&
+                            x.UserTypeId == userTypeId &&
+                           !string.IsNullOrEmpty(x.ImageUrl));
+
+            if (printed == 0)
+            {
+                query = query.Where(x => x.IsPrinted != true);
+            }
+            else if (printed == 1)
+            {
+                query = query.Where(x => x.IsPrinted == true);
+            }
+
+            if (!string.IsNullOrEmpty(code))
+            {
+                query = query.Where(x => x.UserCode == code);
+            }
+
+            return await query
+                .Select(x => new UserPrintDto
+                {
+                    Id = x.Id,
+                    FullName = x.FullName,
+                    DivisionName = x.DivisionName,
+                    Class = x.Class,
+                    FamilyId = x.FamilyId,
+                    UserCode = x.UserCode,
+                    ImageUrl = x.ImageUrl,
+                    ReferenceId = x.ReferenceId,
+                    Title = x.Title,
+                    CardNumber = x.CardNumber,
+                    Children = x.UserTypeId == (int)UserTypeEnum.Parent ? context.Users
+                        .Where(z => z.UserTypeId == (int)UserTypeEnum.Student &&
+                                    (x.Childs ?? "").Contains(z.UserCode ?? ""))
+                        .Select(z => new UserPrintDto
+                        {
+                            Id = z.Id,
+                            UserCode = z.UserCode,
+                            FullName = string.IsNullOrWhiteSpace(z.FullName) ? "" : z.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault(),
+                            Class = z.Class
+                        }).ToList() : null
+                }).ToListAsync();
         }
 
     }
