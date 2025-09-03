@@ -11,7 +11,6 @@ namespace PrintApp
     {
         private readonly AppServices appServices = new AppServices();
         string SaveFolderPath = "";
-        string ApiUrl = ConfigurationManager.AppSettings["ApiUrl"];
 
         public Form1()
         {
@@ -20,7 +19,7 @@ namespace PrintApp
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            lblStatus.Text = appServices.ApiUrl;
         }
 
         private void btnGenerate_Click(object sender, EventArgs e)
@@ -80,7 +79,7 @@ namespace PrintApp
             {
                 this.BeginInvoke((MethodInvoker)delegate ()
                 {
-                    MessageBox.Show($"Error: {ex.Message}");
+                    lblStatus.Text = $"{ex.Message}";
                 });
             }
 
@@ -98,7 +97,7 @@ namespace PrintApp
                 string PersonCode = row.UserCode;
                 string PersonName = row.FullName;
                 var classTitle = row.Class;
-                var imageUrl = $"{ApiUrl}{row.ImageUrl}";
+                var imageUrl = $"{appServices.ApiUrl}{row.ImageUrl}";
 
                 Image imgBk = Image.FromFile(backgroundImageUrl);
                 imgBk = ResizeImage(imgBk, 1000, 628);
@@ -134,6 +133,10 @@ namespace PrintApp
             }
             catch (Exception ex)
             {
+                this.BeginInvoke((MethodInvoker)delegate ()
+                {
+                    lblStatus.Text = $"{ex.Message}";
+                });
             }
         }
 
@@ -148,7 +151,7 @@ namespace PrintApp
 
                 string PersonName = row.FullName;
                 var PersonCode = row.UserCode;
-                var imageUrl = $"{ApiUrl}{row.ImageUrl}";
+                var imageUrl = $"{appServices.ApiUrl}{row.ImageUrl}";
                 //var students = dtData.AsEnumerable().Where(row => row["ParentLoginCode"].ToString() == PersonCode).CopyToDataTable();
 
                 if (string.IsNullOrEmpty(imageUrl))

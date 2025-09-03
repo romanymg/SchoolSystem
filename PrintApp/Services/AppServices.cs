@@ -3,6 +3,7 @@ using Common.Enums;
 using Common.Models;
 using System.Configuration;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace PrintApp.Services
 {
@@ -14,10 +15,19 @@ namespace PrintApp.Services
         public T? Data { get; set; }
     }
 
-    internal class AppServices()
+    internal class AppServices
     {
-        string ApiUrl = ConfigurationManager.AppSettings["ApiUrl"];
+        public string? ApiUrl { get; }
 
+        public AppServices()
+        {
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+
+            ApiUrl = config["ApiUrl"];
+        }
         internal async Task<List<UserEntity>> GetUsers(int userTypeId, int printed, string code)
         {
             try
@@ -46,6 +56,5 @@ namespace PrintApp.Services
                 return new List<UserEntity>();
             }
         }
-
     }
 }
