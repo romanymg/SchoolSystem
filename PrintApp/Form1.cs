@@ -19,7 +19,7 @@ namespace PrintApp
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            lblStatus.Text = appServices.ApiUrl;
+            //lblStatus.Text = appServices.ApiUrl;
         }
 
         private void btnGenerate_Click(object sender, EventArgs e)
@@ -150,7 +150,7 @@ namespace PrintApp
                 SolidBrush brush2 = new SolidBrush((Color)new ColorConverter().ConvertFromString("#063721"));
 
                 string PersonName = row.FullName;
-                var PersonCode = row.UserCode;
+                var PersonCode = row.ReferenceId;
                 var imageUrl = $"{appServices.ApiUrl}{row.ImageUrl}";
                 //var students = dtData.AsEnumerable().Where(row => row["ParentLoginCode"].ToString() == PersonCode).CopyToDataTable();
 
@@ -201,6 +201,10 @@ namespace PrintApp
             }
             catch (Exception ex)
             {
+                this.BeginInvoke((MethodInvoker)delegate ()
+                {
+                    lblStatus.Text = $"{ex.Message}";
+                });
             }
         }
 
